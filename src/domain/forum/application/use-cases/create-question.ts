@@ -1,14 +1,18 @@
 import { Question } from '@/domain/forum/enterprise/entities/question'
 import { QuestionsRepos } from '../repos/question-repos'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
+import { Either, right } from '@/core/either'
 interface CreateQuestionUseCaseRequest {
   authorId: string
   title: string
   content: string
 }
-interface CreateQuestionUseCaseResponse {
-  question: Question
-}
+type CreateQuestionUseCaseResponse = Either<
+  null,
+  {
+    question: Question
+  }
+>
 export class CreateQuestionUseCase {
   constructor(private questionsRepos: QuestionsRepos) {}
   async execute({
@@ -22,8 +26,8 @@ export class CreateQuestionUseCase {
       content,
     })
     await this.questionsRepos.create(question)
-    return {
+    return right({
       question,
-    }
+    })
   }
 }

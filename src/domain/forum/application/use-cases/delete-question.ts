@@ -1,9 +1,15 @@
+import { Either, left, right } from '@/core/either'
 import { QuestionsRepos } from '../repos/question-repos'
+import { NotFoundError } from './errors/not-found-error'
+import { NotAllowedError } from './errors/not-allowed-error'
 interface DeleteQuestionUseCaseRequest {
   authorId: string
   questionId: string
 }
-interface DeleteQuestionUseCaseResponse {}
+type DeleteQuestionUseCaseResponse = Either<
+  NotFoundError | NotAllowedError,
+  object
+>
 export class DeleteQuestionUseCase {
   constructor(private questionsRepos: QuestionsRepos) {}
   async execute({
@@ -12,12 +18,12 @@ export class DeleteQuestionUseCase {
   }: DeleteQuestionUseCaseRequest): Promise<DeleteQuestionUseCaseResponse> {
     const question = await this.questionsRepos.findById(questionId)
     if (!question) {
-      throw new Error('Question not found.')
+      return left(new NotFoundError())
     }
     if (authorId !== question.authorId.toString()) {
-      throw new Error('Not allowed.')
+      return left(new NotAllowedError())
     }
     await this.questionsRepos.delete(question)
-    return {}
+    return right({})
   }
 }

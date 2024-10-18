@@ -1,11 +1,16 @@
 import { Question } from '@/domain/forum/enterprise/entities/question'
 import { QuestionsRepos } from '../repos/question-repos'
+import { NotFoundError } from './errors/not-found-error'
+import { Either, left, right } from '@/core/either'
 interface GetQuestionBySlugUseCaseRequest {
   slug: string
 }
-interface GetQuestionBySlugUseCaseResponse {
-  question: Question
-}
+type GetQuestionBySlugUseCaseResponse = Either<
+  NotFoundError,
+  {
+    question: Question
+  }
+>
 export class GetQuestionBySlugUseCase {
   constructor(private questionsRepos: QuestionsRepos) {}
   async execute({
@@ -13,10 +18,10 @@ export class GetQuestionBySlugUseCase {
   }: GetQuestionBySlugUseCaseRequest): Promise<GetQuestionBySlugUseCaseResponse> {
     const question = await this.questionsRepos.findBySlug(slug)
     if (!question) {
-      throw new Error('Question not found.')
+      return left(new NotFoundError())
     }
-    return {
+    return right({
       question,
-    }
+    })
   }
 }

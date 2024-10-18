@@ -1,5 +1,8 @@
+import { Either, left, right } from '@/core/either'
 import { Answer } from '../../enterprise/entities/answer'
 import { AnswersRepo } from '../repos/answer-repo'
+import { NotFoundError } from './errors/not-found-error'
+import { NotAllowedError } from './errors/not-allowed-error'
 
 interface EditAnswerUseCaseRequest {
   authorId: string
@@ -7,9 +10,12 @@ interface EditAnswerUseCaseRequest {
   content: string
 }
 
-interface EditAnswerUseCaseResponse {
-  answer: Answer
-}
+type EditAnswerUseCaseResponse = Either<
+  NotFoundError | NotAllowedError,
+  {
+    answer: Answer
+  }
+>
 export class EditAnswerUseCase {
   constructor(private answersRepos: AnswersRepo) {}
   async execute({
@@ -19,13 +25,13 @@ export class EditAnswerUseCase {
   }: EditAnswerUseCaseRequest): Promise<EditAnswerUseCaseResponse> {
     const answer = await this.answersRepos.findById(answerId)
     if (!answer) {
-      throw new Error('Answer not found.')
+      return left(new NotFoundError())
     }
     if (authorId !== answer.authorId.toString()) {
-      throw new Error('Not allowed.')
+      return left(new NotAllowedError())
     }
     answer.content = content
     await this.answersRepos.save(answer)
-    return { answer }
+    return right({ answer })
   }
 }

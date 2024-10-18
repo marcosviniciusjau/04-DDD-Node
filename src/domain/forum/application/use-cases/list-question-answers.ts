@@ -1,12 +1,16 @@
+import { Either, right } from '@/core/either'
 import { Answer } from '../../enterprise/entities/answer'
 import { AnswersRepo } from '../repos/answer-repo'
 interface ListQuestionAnswersUseCaseRequest {
   questionId: string
   page: number
 }
-interface ListQuestionAnswersUseCaseResponse {
-  answers: Answer[]
-}
+type ListQuestionAnswersUseCaseResponse = Either<
+  null,
+  {
+    answers: Answer[]
+  }
+>
 export class ListQuestionAnswersUseCase {
   constructor(private answersRepos: AnswersRepo) {}
   async execute({
@@ -16,8 +20,8 @@ export class ListQuestionAnswersUseCase {
     const answers = await this.answersRepos.findByQuestionId(questionId, {
       page,
     })
-    return {
+    return right({
       answers,
-    }
+    })
   }
 }

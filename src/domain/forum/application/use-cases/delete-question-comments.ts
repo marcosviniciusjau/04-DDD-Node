@@ -1,11 +1,17 @@
+import { Either, right } from '@/core/either'
 import { QuestionCommentsRepos } from '../repos/question-comment-repos'
+import { NotAllowedError } from './errors/not-allowed-error'
+import { NotFoundError } from './errors/not-found-error'
 
 interface DeleteQuestionCommentUseCaseRequest {
   authorId: string
   questionCommentId: string
 }
 
-interface DeleteQuestionCommentUseCaseResponse {}
+type DeleteQuestionCommentUseCaseResponse = Either<
+  NotAllowedError | NotFoundError,
+  object
+>
 export class DeleteQuestionCommentUseCase {
   constructor(private questionCommentRepos: QuestionCommentsRepos) {}
 
@@ -17,13 +23,13 @@ export class DeleteQuestionCommentUseCase {
       await this.questionCommentRepos.findById(questionCommentId)
 
     if (!questionComment) {
-      throw new Error('Question comment not found')
+      return left(new NotFoundError())
     }
     if (questionComment.authorId.toString() !== authorId) {
-      throw new Error('Not allowed')
+      return left(new NotAllowedError())
     }
 
     await this.questionCommentRepos.delete(questionComment)
-    return {}
+    return right({})
   }
 }

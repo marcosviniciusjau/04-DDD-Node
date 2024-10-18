@@ -1,17 +1,21 @@
-import { UniqueEntityID } from '@/core/entities/unique-entity-id'
-import { Answer } from '../../enterprise/entities/answer'
 import { AnswersRepo } from '../repos/answer-repo'
 import { Question } from '../../enterprise/entities/question'
 import { QuestionsRepos } from '../repos/question-repos'
+import { Either, left, right } from '@/core/either'
+import { NotFoundError } from './errors/not-found-error'
+import { NotAllowedError } from './errors/not-allowed-error'
 
 interface ChooseBestAnswerRequest {
   authorId: string
   answerId: string
 }
 
-interface ChooseBestAnswerResponse {
-  question: Question
-}
+type ChooseBestAnswerResponse = Either<
+  NotFoundError | NotAllowedError,
+  {
+    question: Question
+  }
+>
 
 export class ChooseBestAnswerUseCase {
   constructor(
@@ -25,23 +29,23 @@ export class ChooseBestAnswerUseCase {
   }: ChooseBestAnswerRequest): Promise<ChooseBestAnswerResponse> {
     const answer = await this.answersRepo.findById(answerId)
     if (!answer) {
-      throw new Error('Answer not found')
+      return left(new NotFoundError())
     }
-    
+
     const question = await this.questionRepos.findById(
       answer.questionId.toString(),
     )
 
     if (!question) {
-      throw new Error('Question not found')
+      return left(new NotFoundError())
     }
 
     if (authorId !== question.authorId.toString()) {
-      throw new Error('Not allowed')
+      return left(new NotAllowedError())
     }
 
     question.bestAnswerId = answer.id
     await this.questionRepos.save(question)
-    return { question }
+    return right({ question })
   }
 }

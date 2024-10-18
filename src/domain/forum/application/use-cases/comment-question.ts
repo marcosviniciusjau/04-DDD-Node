@@ -2,15 +2,20 @@ import { QuestionsRepos } from '../repos/question-repos'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { QuestionComment } from '../../enterprise/entities/question-comment'
 import { QuestionCommentsRepos } from '../repos/question-comment-repos'
+import { Either, left, right } from '@/core/either'
+import { NotFoundError } from './errors/not-found-error'
 interface CommentQuestionUseCaseRequest {
   authorId: string
   questionId: string
   content: string
 }
 
-interface CommentQuestionUseCaseResponse {
-  questionComment: QuestionComment
-}
+type CommentQuestionUseCaseResponse = Either<
+  NotFoundError,
+  {
+    questionComment: QuestionComment
+  }
+>
 export class CommentQuestionUseCase {
   constructor(
     private questionsRepos: QuestionsRepos,
@@ -24,7 +29,7 @@ export class CommentQuestionUseCase {
   }: CommentQuestionUseCaseRequest): Promise<CommentQuestionUseCaseResponse> {
     const question = await this.questionsRepos.findById(questionId)
     if (!question) {
-      throw new Error('Question not found')
+      return left(new NotFoundError())
     }
 
     const questionComment = QuestionComment.create({
@@ -34,8 +39,8 @@ export class CommentQuestionUseCase {
     })
 
     await this.questionCommentRepos.create(questionComment)
-    return {
+    return right({
       questionComment,
-    }
+    })
   }
 }
