@@ -1,6 +1,6 @@
 import { PaginationParams } from '@/core/repos/pagination-params'
 import { Answer } from '../../enterprise/entities/answer'
-export interface AnswersRepo {
+export interface AnswersRepos {
   findByQuestionId(
     questionId: string,
     params: PaginationParams,

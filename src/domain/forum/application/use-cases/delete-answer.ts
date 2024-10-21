@@ -1,5 +1,5 @@
-import { Either, right } from '@/core/either'
-import { AnswersRepo } from '../repos/answer-repo'
+import { Either, left, right } from '@/core/either'
+import { AnswersRepos } from '../repos/answer-repos'
 import { NotFoundError } from './errors/not-found-error'
 import { NotAllowedError } from './errors/not-allowed-error'
 interface DeleteAnswerUseCaseRequest {
@@ -12,19 +12,19 @@ type DeleteAnswerUseCaseResponse = Either<
   object
 >
 export class DeleteAnswerUseCase {
-  constructor(private answerRepo: AnswersRepo) {}
+  constructor(private answerRepos: AnswersRepos) {}
   async execute({
     answerId,
     authorId,
   }: DeleteAnswerUseCaseRequest): Promise<DeleteAnswerUseCaseResponse> {
-    const answer = await this.answerRepo.findById(answerId)
+    const answer = await this.answerRepos.findById(answerId)
     if (!answer) {
       return left(new NotFoundError())
     }
     if (authorId !== answer.authorId.toString()) {
       return left(new NotAllowedError())
     }
-    await this.answerRepo.delete(answer)
+    await this.answerRepos.delete(answer)
     return right({})
   }
 }
