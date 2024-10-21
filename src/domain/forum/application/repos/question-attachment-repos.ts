@@ -2,4 +2,5 @@ import { QuestionAttachment } from '../../enterprise/entities/question-attachmen
 
 export interface QuestionAttachmentRepos {
   findByQuestionId(questionId: string): Promise<QuestionAttachment[]>
+  deleteByQuestionId(questionId: string): Promise<void>
 }
