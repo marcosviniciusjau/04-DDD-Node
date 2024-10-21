@@ -1,4 +1,4 @@
-import { AnswersRepo } from '../repos/answer-repo'
+import { AnswersRepos } from '../repos/answer-repos'
 import { Question } from '../../enterprise/entities/question'
 import { QuestionsRepos } from '../repos/question-repos'
 import { Either, left, right } from '@/core/either'
@@ -20,7 +20,7 @@ type ChooseBestAnswerResponse = Either<
 export class ChooseBestAnswerUseCase {
   constructor(
     private questionRepos: QuestionsRepos,
-    private answersRepo: AnswersRepo,
+    private answersRepo: AnswersRepos,
   ) {}
 
   async execute({

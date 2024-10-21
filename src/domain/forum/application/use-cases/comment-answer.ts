@@ -1,4 +1,4 @@
-import { AnswersRepo } from '../repos/answer-repo'
+import { AnswersRepos } from '../repos/answer-repos'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { AnswerComment } from '../../enterprise/entities/answer-comment'
 import { AnswerCommentsRepos } from '../repos/answer-comment-repos'
@@ -18,7 +18,7 @@ type CommentAnswerUseCaseResponse = Either<
 >
 export class CommentAnswerUseCase {
   constructor(
-    private answersRepos: AnswersRepo,
+    private answersRepos: AnswersRepos,
     private answerCommentRepos: AnswerCommentsRepos,
   ) {}
 
